@@ -29,7 +29,8 @@ export default function NavBar() {
 
         <nav className="flex items-center gap-1 rounded-2xl bg-neutral-100 p-1.5">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <Link
@@ -66,7 +67,8 @@ export default function NavBar() {
             </svg>
           </button>
 
-          {langOpen && (
+          {/* Language Switcher */}
+          {/* {langOpen && (
             <ul className="absolute right-0 z-10 mt-2 w-36 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-md">
               {LANGUAGES.map((lang) => (
                 <li key={lang.code}>
@@ -86,7 +88,7 @@ export default function NavBar() {
                 </li>
               ))}
             </ul>
-          )}
+          )} */}
         </div>
       </div>
     </div>

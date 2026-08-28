@@ -8,10 +8,12 @@ import {
   editTrip,
 } from '../../lib/features/trips/tripsSlice';
 import DatePickerInput from '@/app/lib/components/DatePickerInput';
+import TripCard from '@/app/lib/components/TripCard';
 
 export default function TripList() {
   const trips = useAppSelector((state) => state.trip.trips);
   const dispatch = useAppDispatch();
+
 
   const [title, setTitle] = useState('');
   const [destination, setDestination] = useState('');
@@ -24,10 +26,12 @@ export default function TripList() {
   const handleAddTrip = () => {
     if (!title.trim() || !destination.trim()) return;
 
-    dispatch(addTrip({ title, destination, startDate, endDate }));
+    dispatch(addTrip({ title, destination, startDate, endDate, activities: {} }));
 
     setTitle('');
     setDestination('');
+    setStartDate('');
+    setEndDate('');
   };
 
   const startEditing = (tripId: string, currentDestination: string) => {
@@ -79,6 +83,7 @@ export default function TripList() {
           onChange={(e) => setDestination(e.target.value)}
           className={inputClasses}
         />
+
         <DatePickerInput value={startDate} onDateChange={handleStartingDate} />
         <DatePickerInput value={endDate} onDateChange={handleEndingDate} />
 
@@ -95,68 +100,19 @@ export default function TripList() {
           No trips yet — add one above.
         </p>
       ) : (
-        <ul className="divide-y divide-neutral-200 dark:divide-neutral-800">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {trips.map((trip) => (
-            <li
+            <TripCard
               key={trip.id}
-              className="flex flex-wrap items-center justify-between gap-2 py-3"
-            >
-              {editingId === trip.id ? (
-                <>
-                  <span className="text-sm text-neutral-900 dark:text-neutral-100">
-                    {trip.title} —
-                  </span>
-                  <input
-                    type="text"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    autoFocus
-                    className={`flex-1 ${inputClasses}`}
-                  />
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => saveEdit(trip.id)}
-                      className="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span className="text-sm flex gap-2 text-neutral-900 dark:text-neutral-100">
-                    <span className="font-medium">{trip.title}</span>
-                    <span className="text-neutral-900 dark:text-neutral-100">
-                      {' '}
-                      — {trip.destination}
-                    </span>
-                    <span>
-                      {trip.startDate} - {trip.endDate}
-                    </span>
-                  </span>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => startEditing(trip.id, trip.destination)}
-                      className="text-sm font-medium text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => dispatch(deleteTrip(trip.id))}
-                      className="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              )}
-            </li>
+              trip={trip}
+              isEditing={editingId === trip.id}
+              editValue={editValue}
+              onEditValueChange={setEditValue}
+              onStartEdit={startEditing}
+              onSaveEdit={saveEdit}
+              onCancelEdit={cancelEdit}
+              onDelete={(id) => dispatch(deleteTrip(id))}
+            />
           ))}
         </ul>
       )}
