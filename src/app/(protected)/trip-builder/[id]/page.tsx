@@ -16,7 +16,7 @@ import {
   formatDayLabel,
 } from '@/app/lib/utils/date';
 import LocationSearchInput from '@/app/lib/components/LocationSearchInput';
-import TripMap from '@/app/lib/components/TripMap.';
+import TripMap from '@/app/lib/components/TripMap';
 
 export default function TripBuilderPage() {
   const { id } = useParams<{ id: string }>();
