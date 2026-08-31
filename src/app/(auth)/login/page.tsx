@@ -5,13 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '@/app/lib/features/auth/useAuth';
 
-export default function SignupPage() {
-  const { register, isLoading, error, isAuthenticated, clearAuthError } =
+export default function LoginPage() {
+  const { login, isLoading, error, isAuthenticated, clearAuthError } =
     useAuth();
   const router = useRouter();
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -28,65 +26,20 @@ export default function SignupPage() {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const displayName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    register({ email, password, displayName });
+    login({ email, password });
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12">
       <div className="w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-8">
         <div className="mb-8 text-center">
-          <h1 className="text-xl font-bold text-neutral-900">
-            Create your account
-          </h1>
+          <h1 className="text-xl font-bold text-neutral-900">Welcome back</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Start planning your next trip.
+            Log in to keep planning your trips.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label
-                htmlFor="firstName"
-                className="mb-1.5 block text-sm font-medium text-neutral-700"
-              >
-                First name
-              </label>
-              <input
-                id="firstName"
-                name="firstName"
-                type="text"
-                autoComplete="given-name"
-                required
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Jane"
-                className="w-full rounded-xl border border-neutral-200 px-4 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-900/10"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="lastName"
-                className="mb-1.5 block text-sm font-medium text-neutral-700"
-              >
-                Last name
-              </label>
-              <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                autoComplete="family-name"
-                required
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Doe"
-                className="w-full rounded-xl border border-neutral-200 px-4 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-900/10"
-              />
-            </div>
-          </div>
-
           <div>
             <label
               htmlFor="email"
@@ -118,12 +71,12 @@ export default function SignupPage() {
               id="password"
               name="password"
               type="password"
-              autoComplete="new-password"
+              autoComplete="current-password"
               required
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
+              placeholder="••••••••"
               className="w-full rounded-xl border border-neutral-200 px-4 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-900/10"
             />
           </div>
@@ -139,17 +92,17 @@ export default function SignupPage() {
             disabled={isLoading}
             className="w-full rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-60"
           >
-            {isLoading ? 'Creating account...' : 'Create account'}
+            {isLoading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-neutral-500">
-          Already have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link
-            href="/login"
+            href="/signup"
             className="font-medium text-neutral-900 hover:underline"
           >
-            Log in
+            Sign up
           </Link>
         </p>
       </div>

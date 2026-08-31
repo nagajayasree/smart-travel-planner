@@ -3,13 +3,21 @@
 import { Trip } from '../../lib/features/trips/tripsSlice';
 import { useRouter } from 'next/navigation';
 import { formatDate, getTripDuration } from '../utils/date';
+import DatePickerInput from './DatePickerInput';
+
+export interface TripEditForm {
+  title: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+}
 
 interface TripCardProps {
   trip: Trip;
   isEditing: boolean;
-  editValue: string;
-  onEditValueChange: (value: string) => void;
-  onStartEdit: (tripId: string, currentDestination: string) => void;
+  editForm: TripEditForm;
+  onEditFormChange: (form: TripEditForm) => void;
+  onStartEdit: (trip: Trip) => void;
   onSaveEdit: (tripId: string) => void;
   onCancelEdit: () => void;
   onDelete: (tripId: string) => void;
@@ -21,14 +29,18 @@ const inputClasses =
 export default function TripCard({
   trip,
   isEditing,
-  editValue,
-  onEditValueChange,
+  editForm,
+  onEditFormChange,
   onStartEdit,
   onSaveEdit,
   onCancelEdit,
   onDelete,
 }: TripCardProps) {
   const router = useRouter();
+
+  const setField = (field: keyof TripEditForm, value: string) => {
+    onEditFormChange({ ...editForm, [field]: value });
+  };
 
   return (
     <li
@@ -39,17 +51,34 @@ export default function TripCard({
     >
       {isEditing ? (
         <>
-          <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-            {trip.title}
-          </span>
           <input
             type="text"
-            value={editValue}
-            onChange={(e) => onEditValueChange(e.target.value)}
+            value={editForm.title}
+            onChange={(e) => setField('title', e.target.value)}
             onClick={(e) => e.stopPropagation()}
+            placeholder="Trip title"
             autoFocus
             className={inputClasses}
           />
+          <input
+            type="text"
+            value={editForm.destination}
+            onChange={(e) => setField('destination', e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            placeholder="Destination"
+            className={inputClasses}
+          />
+          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+            <DatePickerInput
+              value={editForm.startDate}
+              onDateChange={(value) => setField('startDate', value)}
+            />
+            <DatePickerInput
+              value={editForm.endDate}
+              onDateChange={(value) => setField('endDate', value)}
+            />
+          </div>
+
           <div className="mt-auto flex justify-end gap-3 border-t border-neutral-100 pt-3 dark:border-neutral-800">
             <button
               onClick={(e) => {
@@ -100,7 +129,7 @@ export default function TripCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onStartEdit(trip.id, trip.destination);
+                onStartEdit(trip);
               }}
               className="text-sm font-medium text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
             >

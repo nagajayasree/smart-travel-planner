@@ -6,14 +6,24 @@ import {
   addTrip,
   deleteTrip,
   editTrip,
+  Trip,
 } from '../../lib/features/trips/tripsSlice';
 import DatePickerInput from '@/app/lib/components/DatePickerInput';
-import TripCard from '@/app/lib/components/TripCard';
+import TripCard, { TripEditForm } from '@/app/lib/components/TripCard';
+import { useAuth } from '@/app/lib/features/auth/useAuth';
+
+const emptyEditForm: TripEditForm = {
+  title: '',
+  destination: '',
+  startDate: '',
+  endDate: '',
+};
 
 export default function TripList() {
   const trips = useAppSelector((state) => state.trip.trips);
+  const tripError = useAppSelector((state) => state.trip.error);
   const dispatch = useAppDispatch();
-
+  const { user } = useAuth();
 
   const [title, setTitle] = useState('');
   const [destination, setDestination] = useState('');
@@ -21,12 +31,15 @@ export default function TripList() {
   const [endDate, setEndDate] = useState('');
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
+  const [editForm, setEditForm] = useState<TripEditForm>(emptyEditForm);
 
   const handleAddTrip = () => {
     if (!title.trim() || !destination.trim()) return;
+    if (!user) return;
 
-    dispatch(addTrip({ title, destination, startDate, endDate, activities: {} }));
+    dispatch(
+      addTrip({ userId: user.uid, title, destination, startDate, endDate }),
+    );
 
     setTitle('');
     setDestination('');
@@ -34,34 +47,32 @@ export default function TripList() {
     setEndDate('');
   };
 
-  const startEditing = (tripId: string, currentDestination: string) => {
-    setEditingId(tripId);
-    setEditValue(currentDestination);
+  const startEditing = (trip: Trip) => {
+    setEditingId(trip.id);
+    setEditForm({
+      title: trip.title,
+      destination: trip.destination,
+      startDate: trip.startDate ?? '',
+      endDate: trip.endDate ?? '',
+    });
   };
 
   const saveEdit = (tripId: string) => {
-    if (!editValue.trim()) return;
+    if (!editForm.title.trim() || !editForm.destination.trim()) return;
 
-    dispatch(editTrip({ id: tripId, destination: editValue }));
+    dispatch(editTrip({ id: tripId, ...editForm }));
 
     setEditingId(null);
-    setEditValue('');
+    setEditForm(emptyEditForm);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditValue('');
+    setEditForm(emptyEditForm);
   };
 
-  const handleStartingDate = (value: string) => {
-    setStartDate(value);
-    console.log('StartDate:', value);
-  };
-
-  const handleEndingDate = (value: string) => {
-    setEndDate(value);
-    console.log('EndDate:', value);
-  };
+  const handleStartingDate = (value: string) => setStartDate(value);
+  const handleEndingDate = (value: string) => setEndDate(value);
 
   const inputClasses =
     'w-48 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder-neutral-500 dark:focus:ring-neutral-100';
@@ -95,19 +106,25 @@ export default function TripList() {
         </button>
       </div>
 
+      {tripError && (
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+          {tripError}
+        </p>
+      )}
+
       {trips.length === 0 ? (
         <p className="text-sm text-neutral-500 dark:text-neutral-400">
           No trips yet — add one above.
         </p>
       ) : (
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-1 lg:grid-cols-3">
           {trips.map((trip) => (
             <TripCard
               key={trip.id}
               trip={trip}
               isEditing={editingId === trip.id}
-              editValue={editValue}
-              onEditValueChange={setEditValue}
+              editForm={editForm}
+              onEditFormChange={setEditForm}
               onStartEdit={startEditing}
               onSaveEdit={saveEdit}
               onCancelEdit={cancelEdit}

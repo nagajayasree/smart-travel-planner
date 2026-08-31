@@ -1,4 +1,4 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { configureStore, combineReducers, type Action } from '@reduxjs/toolkit';
 import {
   persistStore,
   persistReducer,
@@ -11,15 +11,27 @@ import {
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import tripReducer from './features/trips/tripsSlice';
+import authReducer from './features/auth/authSlice';
+import { resetStore } from './actions';
 
-const rootReducer = combineReducers({
+const appReducer = combineReducers({
   trip: tripReducer,
+  auth: authReducer,
 });
+
+type AppState = ReturnType<typeof appReducer>;
+
+const rootReducer = (state: AppState | undefined, action: Action): AppState => {
+  if (resetStore.match(action)) {
+    state = undefined;
+  }
+  return appReducer(state, action);
+};
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['trip'],
+  whitelist: [] as string[],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
